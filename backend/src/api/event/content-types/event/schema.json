@@ -1,0 +1,67 @@
+{
+  "kind": "collectionType",
+  "collectionName": "events",
+  "info": {
+    "singularName": "event",
+    "pluralName": "events",
+    "displayName": "Event",
+    "description": "Events happening in the community"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "date": {
+      "type": "date",
+      "required": true
+    },
+    "time": {
+      "type": "time",
+      "required": true
+    },
+    "venue_address": {
+      "type": "string",
+      "required": true
+    },
+    "coordinates": {
+      "type": "json"
+    },
+    "ticket_price": {
+      "type": "decimal",
+      "default": 0
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::category.category",
+      "inversedBy": "events"
+    },
+    "rsvps": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::rsvp.rsvp",
+      "mappedBy": "event"
+    }
+  }
+}

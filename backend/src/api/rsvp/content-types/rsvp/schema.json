@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "rsvps",
+  "info": {
+    "singularName": "rsvp",
+    "pluralName": "rsvps",
+    "displayName": "RSVP",
+    "description": "User RSVPs for events"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "event": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::event.event",
+      "inversedBy": "rsvps"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "rsvps"
+    }
+  }
+}
