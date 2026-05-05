@@ -15,8 +15,8 @@ This guide provides a comprehensive list of questions and answers related to the
 **A:**
 
 1. **Guest User:** Can browse events, search, and view details.
-2. **Registered User:** Can do everything a guest does, plus RSVP for events and manage their profile.
-3. **Administrator:** Manages all content (Events, Categories, Users) through the Strapi CMS dashboard.
+2. **Registered User:** Can RSVP for events, manage a personal dashboard (Favorites, Profile, History), and submit new events for review.
+3. **Administrator:** Manages all content through the Strapi CMS dashboard, including approving user submissions.
 
 ---
 
@@ -74,9 +74,10 @@ This guide provides a comprehensive list of questions and answers related to the
 
 **A:**
 
-* **Event & Category**: A *Many-to-One* relationship. Many events can belong to one category (e.g., multiple concerts under "Music").
+* **Event & Category**: A *Many-to-One* relationship. Many events can belong to one category.
 * **Event & RSVP**: A *One-to-Many* relationship. One event can have many RSVPs.
 * **User & RSVP**: A *One-to-Many* relationship. One user can RSVP to many events.
+* **User & Event (Organizer)**: A *One-to-Many* relationship. One user can be the organizer of multiple events.
 
 ### Q: What is a "Slug" in your database and why is it important?
 
@@ -180,6 +181,14 @@ This guide provides a comprehensive list of questions and answers related to the
 ---
 
 ## 10. Advanced Viva Questions (The "Hero" Level)
+
+### Q: Why did you implement "Custom Controllers" in the Strapi backend?
+
+**A:** By default, Strapi core controllers allow full access if a user has the "create" permission. I implemented custom controllers for **Events** and **RSVPs** to:
+
+1. **Enforce Security**: Automatically assign the authenticated user's ID to the record so they can't submit data on behalf of others.
+2. **Data Privacy**: Override the `find` method so that users can *only* see their own RSVP history, even if they have read permissions.
+3. **Automate Logic**: Ensure every event submitted has an `organizer` linked automatically without requiring the frontend to send the user ID manually.
 
 ### Q: What are "Server Components" vs "Client Components" in Next.js?
 

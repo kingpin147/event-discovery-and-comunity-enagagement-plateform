@@ -9,6 +9,10 @@ A premium, full-stack web application designed to help users find, explore, and 
 * **Headless CMS (Strapi v5)**: Manage all content effortlessly with a powerful admin dashboard.
 * **Secure Authentication (NextAuth.js)**: Role-based access for Guests, Registered Users, and Admins.
 * **RSVP System**: Register for events with a single click and manage them in your personal dashboard.
+* **User-Led Submissions**: Registered users can submit their own events for admin review and approval.
+* **Premium Dashboard**: Manage your profile, view registration history, track favorite events, and create listings.
+* **Advanced Security**: Backend-level validation to ensure users only see and manage their own data.
+* **Informational Hub**: Comprehensive "About Us" and "Contact Us" pages for a complete platform experience.
 * **Blazing Performance**: Redis-powered caching (Upstash) and image optimization (Cloudinary).
 * **Fully Responsive**: Premium UI designed for mobile, tablet, and desktop using Tailwind CSS and Shadcn/ui.
 

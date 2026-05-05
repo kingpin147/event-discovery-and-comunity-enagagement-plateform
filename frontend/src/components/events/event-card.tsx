@@ -3,7 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Calendar, MapPin, Clock } from 'lucide-react'
+import { Calendar, MapPin, Clock, Heart } from 'lucide-react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,8 @@ interface EventCardProps {
 }
 
 const EventCard = ({ event, isHovered, onHover }: EventCardProps) => {
+  const [isFavorite, setIsFavorite] = React.useState(false)
+
   return (
     <Card 
       className={cn(
@@ -53,6 +55,21 @@ const EventCard = ({ event, isHovered, onHover }: EventCardProps) => {
             {event.category.name}
           </Badge>
         )}
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsFavorite(!isFavorite)
+          }}
+          className={cn(
+            "absolute bottom-2 right-2 rounded-full backdrop-blur-md transition-all z-10",
+            isFavorite ? "bg-red-500 text-white hover:bg-red-600 shadow-lg" : "bg-background/50 hover:bg-background text-muted-foreground"
+          )}
+        >
+          <Heart className={cn("h-5 w-5", isFavorite && "fill-current")} />
+        </Button>
       </div>
 
       <CardContent className="p-5 flex-1 flex flex-col gap-3">

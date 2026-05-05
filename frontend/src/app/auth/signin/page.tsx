@@ -91,9 +91,11 @@ export default function SignInPage() {
         <CardFooter className="flex flex-col gap-4 text-center">
           <div className="text-sm text-muted-foreground">
             Don't have an account?{' '}
-            <Button variant="link" className="p-0 h-auto text-primary font-bold">
-              Sign up
-            </Button>
+            <Link href="/auth/signup">
+              <Button variant="link" className="p-0 h-auto text-primary font-bold">
+                Sign up
+              </Button>
+            </Link>
           </div>
         </CardFooter>
       </Card>
