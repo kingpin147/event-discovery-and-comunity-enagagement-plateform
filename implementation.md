@@ -1,94 +1,44 @@
 # Event Discovery & Community Engagement Platform Implementation Plan
 
-This plan details the architecture and step-by-step implementation for the Event Discovery & Community Engagement Platform. The current repository now uses a unified Next.js application with Prisma and internal API routes, so the core experience is implemented directly in one app rather than through a separate Strapi backend.
+This document reflects the current unified implementation of the project. The app now runs as a single Next.js application with Prisma-backed data models and internal API routes.
 
-> Status summary: the main user-facing features are included in the unified app. The Strapi-specific CMS/admin workflow has been replaced by built-in admin pages, Prisma-backed APIs, and review/moderation features.
+## Current architecture
 
-## Current Unified Technology Stack
+- Frontend: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui
+- Authentication: NextAuth.js credentials provider
+- Data layer: Prisma with SQLite for local development
+- Maps: Leaflet and react-leaflet
+- Content and actions: Next.js route handlers under src/app/api
 
-### Frontend
+## Implemented features
 
-* **Framework**: Next.js (App Router)
-* **Styling**: Tailwind CSS & Shadcn/ui
-* **Authentication**: NextAuth.js
-* **Maps**: Leaflet.js with OpenStreetMap tiles
-* **Deployment**: Vercel-ready Next.js app
+- Public browsing pages for home, events, about, and contact
+- Search, category filters, and map/list view on the events page
+- Event detail pages with venue and RSVP actions
+- Authenticated dashboards for RSVPs, favorites, profile, and event submission
+- Admin moderation and role management views
+- Review and rating support for events
 
-### Backend
+## Project structure
 
-* **Database**: Prisma + SQLite locally (ready to scale to PostgreSQL)
-* **API Layer**: Internal Next.js route handlers
-* **File Handling**: Basic upload endpoint for event images
-* **Admin Features**: Built-in admin dashboard for moderation and role management
+- src/app/ — application pages and API routes
+- src/components/ — reusable UI and event components
+- src/lib/ — auth, database, helpers, and shared utilities
+- prisma/ — schema, migrations, and seed data
 
----
+## Development checklist
 
-## Implementation Phases
+- [x] Install dependencies and configure the app shell
+- [x] Set up Prisma models and database migrations
+- [x] Implement authentication and protected routes
+- [x] Build public and dashboard pages
+- [x] Add API routes for events, categories, RSVPs, and favorites
+- [x] Add admin moderation and user management pages
+- [x] Verify the project with npm run build
 
-### Phase 1: Backend Setup & Configuration (Strapi)
+## Optional future enhancements
 
-1. Initialize a new Strapi v5 project.
-2. Configure Strapi to connect to a free remote PostgreSQL database (Neon).
-3. Integrate the Strapi Cloudinary provider plugin for free image storage.
-4. **Data Modeling (Content Types)**:
-
-    * `Event`: Title, Slug, Description, Date, Time, Venue Address, Coordinates (Lat/Lng), Ticket Price, Featured (boolean).
-    * `Category`: Name, Slug, Color/Icon.
-    * `RSVP`: Relation to Event and User.
-
-5. Set up Strapi Roles & Permissions (Public read-only, Authenticated read/write for RSVPs).
-6. Expose the REST API.
-
-### Phase 2: Frontend Foundation & Caching (Next.js + Redis)
-
-1. Initialize Next.js 16+ with Tailwind CSS and TypeScript.
-2. Setup Shadcn/ui for accessible, beautifully designed components.
-3. Configure environment variables for Strapi API and **Upstash Redis**.
-4. Create a caching utility using Upstash to intercept and store public event fetches.
-5. Create the core layout (Navbar, Footer, Mobile Navigation).
-
-### Phase 3: Core Features (Map & List Views)
-
-1. **Interactive Map (FR-01, FR-06)**: Integrate `react-leaflet` with OpenStreetMap tiles. Create map markers dynamically fetched from Strapi (or Redis Cache).
-2. **Event List View (FR-02, FR-09)**: Build the list/grid view of events.
-3. **Synchronization**: Implement global state (Zustand or Context API) so that hovering a list item highlights the corresponding map marker.
-4. **Category Filtering & Search (FR-03, FR-08)**: Add UI for filtering and a search bar.
-
-### Phase 4: Event Details & Media
-
-1. **Event Detail Page (FR-04, FR-05)**: Create dynamic routes (`/events/[slug]`).
-2. Display rich descriptions, image galleries (using Cloudinary optimized URLs), and a mini-map for the specific venue.
-3. **Featured Section (FR-07)**: Build a responsive carousel on the homepage for events marked as "Featured" in Strapi.
-
-### Phase 5: Authentication & User Engagement
-
-1. **Auth Integration**: Set up NextAuth.js with Credentials provider linking to Strapi's built-in user authentication.
-2. **Role Management**: Implement UI logic for Guest vs Registered Users.
-3. **RSVP System**: Allow authenticated users to click an RSVP button, sending a POST request to Strapi to save the RSVP relation. (RSVPs bypass cache to show real-time state).
-4. **User Dashboard**: A simple profile page showing saved events and RSVPs.
-
-### Phase 6: Polish & Deployment
-
-1. Ensure full mobile responsiveness (mobile-first design).
-2. Add SEO meta tags and structured data for events.
-3. Provide instructions for deploying the Next.js app to Vercel and the Strapi app to Render.
-
-## Current Implementation Status
-
-### Core platform features
-
-* [x] Interactive map and event markers
-* [x] Event list view with search and category filters
-* [x] Event detail pages with venue, map, and pricing
-* [x] Featured events section on the homepage
-* [x] Authentication and protected dashboard routes
-* [x] RSVP and favorites workflows
-* [x] Review and rating support
-* [x] Admin moderation and user role management
-
-### Still optional / future enhancements
-
-* [ ] External Strapi CMS deployment
-* [ ] Cloudinary-based media storage
-* [ ] Full production-grade caching layer with Redis
-* [ ] Advanced moderation workflows and content approval history
+- Cloudinary-backed image hosting
+- Redis caching for high-traffic reads
+- Advanced moderation history and audit trails
+- Production deployment to PostgreSQL-backed hosting

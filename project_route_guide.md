@@ -1,74 +1,57 @@
 # Project Page and Route Guide
 
-This document provides a comprehensive overview of all pages and routes within the **Event Discovery & Community Engagement Platform**, covering both the Next.js Frontend and the Strapi Backend.
+This guide maps the current unified Next.js application and its main routes.
 
----
+## Public pages
 
-## 🌐 Frontend (Next.js - App Router)
-
-The frontend is built with **Next.js 15**, utilizing the **App Router** for navigation and **NextAuth.js** for authentication.
-
-### 1. Public Pages
-
-| Route | File Path | Description |
+| Route | File | Purpose |
 | :--- | :--- | :--- |
-| **Home** (`/`) | `src/app/page.tsx` | Landing page with search, featured events, and stats. |
-| **Events List** (`/events`) | `src/app/events/page.tsx` | Searchable directory of all events with map integration. |
-| **Event Details** (`/events/[slug]`) | `src/app/events/[slug]/page.tsx` | Full event info, RSVP button, and interactive map. |
-| **About Us** (`/about`) | `src/app/about/page.tsx` | Platform mission, core values, and community stats. |
-| **Contact Us** (`/contact`) | `src/app/contact/page.tsx` | Support contact info and message submission form. |
+| / | src/app/page.tsx | Home page with hero content, featured events, and CTA sections |
+| /events | src/app/events/page.tsx | Event discovery page with search, filters, and map/list view |
+| /events/[slug] | src/app/events/[slug]/page.tsx | Event detail page with map, RSVP, and review content |
+| /about | src/app/about/page.tsx | Information about the platform |
+| /contact | src/app/contact/page.tsx | Contact information and support form |
 
-### 2. Authentication Pages
+## Authentication pages
 
-| Route | File Path | Description |
+| Route | File | Purpose |
 | :--- | :--- | :--- |
-| **Sign In** (`/auth/signin`) | `src/app/auth/signin/page.tsx` | Login portal for existing users. |
-| **Sign Up** (`/auth/signup`) | `src/app/auth/signup/page.tsx` | Registration page for new community members. |
+| /auth/signin | src/app/auth/signin/page.tsx | Sign-in experience for existing users |
+| /auth/signup | src/app/auth/signup/page.tsx | Registration page for new users |
 
-### 3. Private Dashboard (User Area)
+## Dashboard routes
 
-All routes under `/dashboard` require authentication.
+All dashboard pages require an authenticated session.
 
-| Route | File Path | Description |
+| Route | File | Purpose |
 | :--- | :--- | :--- |
-| **My RSVPs** (`/dashboard`) | `src/app/dashboard/page.tsx` | Overview of events the user is registered for. |
-| **Create Event** (`/dashboard/create-event`) | `src/app/dashboard/create-event/page.tsx` | Form to submit new events for admin approval. |
-| **Favorites** (`/dashboard/favorites`) | `src/app/dashboard/favorites/page.tsx` | List of events bookmarked by the user. |
-| **Profile** (`/dashboard/profile`) | `src/app/dashboard/profile/page.tsx` | Manage account details and view personal stats. |
-| **Settings** (`/dashboard/settings`) | Placeholder | General account and notification preferences. |
+| /dashboard | src/app/dashboard/page.tsx | User overview with RSVPs |
+| /dashboard/favorites | src/app/dashboard/favorites/page.tsx | Saved favorite events |
+| /dashboard/create-event | src/app/dashboard/create-event/page.tsx | Form to submit a new event |
+| /dashboard/profile | src/app/dashboard/profile/page.tsx | User profile and account information |
 
----
+## Admin routes
 
-## ⚙️ Backend (Strapi - Headless CMS)
-
-The backend provides the API and content management system.
-
-### 1. Core API Endpoints
-
-| Resource | Route | Purpose |
+| Route | File | Purpose |
 | :--- | :--- | :--- |
-| **Events** | `/api/events` | Fetching and submitting event data. |
-| **Categories** | `/api/categories` | Fetching event groupings for filters. |
-| **RSVPs** | `/api/rsvps` | Managing event registrations. |
-| **Users** | `/api/users/me` | Fetching the current authenticated user's profile. |
+| /admin | src/app/admin/page.tsx | Event moderation dashboard |
+| /admin/users | src/app/admin/users/page.tsx | User management and role controls |
 
-### 2. Authentication Endpoints
+## API routes
 
-| Purpose | Route | Description |
+| Route | File | Purpose |
 | :--- | :--- | :--- |
-| **Login** | `/api/auth/local` | Standard username/email and password login. |
-| **Register** | `/api/auth/local/register` | Creating a new user account. |
+| /api/events | src/app/api/events/route.ts | List and create events |
+| /api/events/[slug] | src/app/api/events/[slug]/route.ts | Read, update, or delete one event |
+| /api/categories | src/app/api/categories/route.ts | List and create categories |
+| /api/rsvps | src/app/api/rsvps/route.ts | Create or list RSVPs |
+| /api/favorites | src/app/api/favorites/route.ts | Create or list favorites |
+| /api/auth/register | src/app/api/auth/register/route.ts | User registration |
+| /api/auth/[...nextauth] | src/app/api/auth/[...nextauth]/route.ts | Sign-in and session handling |
 
----
+## Interaction summary
 
-## 🔄 Interaction Summary
-
-1. **Public Browsing**: Guests can view all events and informational pages (`/`, `/events`, `/about`, `/contact`).
-2. **Joining the Community**: Users register via `/auth/signup` and login via `/auth/signin`.
-3. **Taking Action**: Registered users can RSVP to events on the `/events/[slug]` page and manage their activity via the `/dashboard`.
-4. **Content Creation**: Users submit events via `/dashboard/create-event`, which appear in the Strapi Admin Panel for approval.
-
----
-
-> [!NOTE]
-> All pages are fully responsive and styled with a premium design system using Tailwind CSS and Shadcn UI components.
+1. Visitors browse the home and events pages.
+2. Users register or sign in to access dashboard features.
+3. Authenticated users can RSVP, save favorites, and submit events.
+4. Admins can review moderation queues and manage user roles from the admin pages.

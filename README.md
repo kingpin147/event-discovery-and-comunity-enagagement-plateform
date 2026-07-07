@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Event Discovery & Community Engagement Platform
 
-## Getting Started
+This repository now contains a unified Next.js application for discovering, browsing, and managing community events. The app combines the public event experience, authenticated dashboards, and admin moderation in one codebase.
 
-First, run the development server:
+## What is included
+
+- Public home, events, about, and contact pages
+- Event discovery with search, filters, and an interactive Leaflet map
+- Event detail pages with RSVP and review support
+- Authenticated dashboards for RSVPs, favorites, profile, and event submission
+- Admin moderation and user role management
+- Prisma-backed persistence with SQLite for local development
+
+## Current stack
+
+- Next.js 16 with the App Router
+- TypeScript
+- Tailwind CSS and shadcn/ui
+- NextAuth.js for credentials-based authentication
+- Prisma ORM with SQLite locally
+- Leaflet and react-leaflet for interactive maps
+
+## Quick start
 
 ```bash
+npm install
+npx prisma migrate dev
+npx prisma db seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key folders
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- src/app/ — pages, layouts, and route handlers
+- src/components/ — reusable UI and event components
+- src/lib/ — auth, database, and helper utilities
+- prisma/ — schema, migrations, and seed data
 
-## Learn More
+## Useful commands
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npx prisma studio
+npx prisma migrate dev --name <change-name>
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Verification status
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The current project builds successfully with npm run build and includes the main user flows described above.

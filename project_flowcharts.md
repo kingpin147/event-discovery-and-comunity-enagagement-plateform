@@ -1,105 +1,74 @@
 # Project Flowcharts
 
-This document visualizes the core workflows and architecture of the **Event Discovery & Community Engagement Platform** using Mermaid diagrams.
+This document summarizes the current workflows of the unified event platform.
 
----
-
-## 1. User Journey Flow (Guest & Registered)
+## 1. User journey flow
 
 ```mermaid
 graph TD
-    Start((Start)) --> Home[Home Page]
-    Home --> Search[Search/Filter Events]
-    Search --> List[Event List/Map View]
-    List --> Detail[Event Detail Page]
-    
-    Detail --> AuthCheck{Is User Logged In?}
-    
-    AuthCheck -- No --> Login[Sign In / Sign Up]
-    Login --> Detail
-    
-    AuthCheck -- Yes --> Actions[User Actions]
-    Actions --> RSVP[Click RSVP]
-    Actions --> Fav[Add to Favorites]
-    Actions --> Review[Submit Review]
-    
-    RSVP --> DB[(Update Strapi DB)]
-    DB --> Success[Confirmation Message]
-    Success --> Dashboard[View in Dashboard]
+    Start((Start)) --> Home[Home page]
+    Home --> Explore[Browse events]
+    Explore --> Detail[Open event details]
+    Detail --> AuthCheck{Logged in?}
+    AuthCheck -- No --> SignIn[Sign in or sign up]
+    SignIn --> Detail
+    AuthCheck -- Yes --> Actions[RSVP / Favorite / Review]
+    Actions --> Dashboard[View in dashboard]
 ```
 
----
-
-## 2. Event Submission & Approval Flow
+## 2. Event submission flow
 
 ```mermaid
 graph LR
-    User[Registered User] --> Form[Fill Event Form]
-    Form --> Submit[Submit to API]
-    Submit --> Draft[Saved as Draft in Strapi]
-    
-    Draft --> AdminNotify[Admin Review Panel]
-    AdminNotify --> Review{Approve?}
-    
-    Review -- No --> Rejected[Notify User/Delete]
-    Review -- Yes --> Publish[Publish Event]
-    
-    Publish --> Frontend[Visible on Public Site]
+    User[Registered user] --> Form[Fill create-event form]
+    Form --> Submit[POST /api/events]
+    Submit --> Draft[Event saved as draft]
+    Draft --> Admin[Admin moderation view]
+    Admin --> Publish[Publish event]
+    Publish --> Public[Visible on site]
 ```
 
----
-
-## 3. System Architecture & Data Flow
+## 3. Current system architecture
 
 ```mermaid
 graph TD
-    subgraph "Frontend (Next.js)"
-        UI[User Interface - Shadcn/UI]
-        NextAuth[NextAuth.js - Session Management]
-        Leaflet[Leaflet.js - Interactive Maps]
+    subgraph Frontend
+        UI[Next.js pages and components]
+        Auth[NextAuth session handling]
+        Maps[Leaflet map UI]
     end
 
-    subgraph "Backend (Strapi v5)"
-        API[REST API Endpoints]
-        Controllers[Custom Controllers - Security]
-        Auth[Strapi Auth Provider]
+    subgraph API
+        Routes[Route handlers under src/app/api]
+        Prisma[Prisma client]
     end
 
-    subgraph "External Services"
-        DB[(PostgreSQL - Neon.tech)]
-        CDN[Cloudinary - Media Storage]
-        Redis[Upstash - Redis Cache]
+    subgraph Data
+        DB[(SQLite for local dev)]
+        Seed[Seed data]
     end
 
-    UI <--> API
-    NextAuth <--> Auth
-    API <--> Controllers
-    Controllers <--> DB
-    API <--> Redis
-    API <--> CDN
+    UI <--> Routes
+    Auth <--> Routes
+    Maps <--> Routes
+    Routes <--> Prisma
+    Prisma <--> DB
+    Seed --> DB
 ```
 
----
-
-## 4. Authentication Logic (NextAuth + Strapi)
+## 4. Authentication flow
 
 ```mermaid
 sequenceDiagram
     participant User
     participant Frontend
     participant NextAuth
-    participant Strapi
-    
-    User->>Frontend: Enter Email/Password
-    Frontend->>NextAuth: Trigger signIn('credentials')
-    NextAuth->>Strapi: POST /api/auth/local
-    Strapi-->>NextAuth: Return JWT + User Object
-    NextAuth-->>NextAuth: Encrypt JWT in Session Cookie
-    NextAuth-->>Frontend: Auth Success
-    Frontend->>User: Redirect to Dashboard
+    participant Prisma
+
+    User->>Frontend: Submit sign-in form
+    Frontend->>NextAuth: Authenticate credentials
+    NextAuth->>Prisma: Validate user record
+    Prisma-->>NextAuth: Return user details
+    NextAuth-->>Frontend: Session created
+    Frontend->>User: Redirect to dashboard
 ```
-
----
-
-> [!TIP]
-> These flowcharts are useful for understanding the technical boundaries of the system and how different components interact in real-time.

@@ -1,78 +1,46 @@
-# Zero-to-Hero Developer Guide 🚀
+# Zero-to-Hero Developer Guide
 
-This guide is for anyone who has just received this project and knows nothing about how it works. It will take you from "zero" to being a "hero" who can explain and run the entire system.
+This guide explains the current unified event platform from scratch.
 
----
+## 1. What this project is
 
-## 1. What is this project?
+This is an event discovery and community engagement application. Users can browse events, view them on a map, sign up, RSVP, save favorites, and submit their own events.
 
-It's an **Event Management System**. Think of it like a simplified version of Eventbrite or Meetup.
+## 2. How to run it
 
-- **Frontend**: What you see in the browser (Next.js).
-- **Backend**: The "Brain" that stores all the data (Strapi).
+1. Install dependencies with npm install
+2. Run Prisma migrations with npx prisma migrate dev
+3. Seed sample data with npx prisma db seed
+4. Start the app with npm run dev
+5. Open http://localhost:3000
 
----
+## 3. Important folders
 
-## 2. How to run it for the first time?
-
-### Step A: Install the "Tools"
-
-You need **Node.js** installed on your computer. [Download it here](https://nodejs.org/).
-
-### Step B: Start the Backend (The Brain)
-
-1. Open a terminal (CMD or PowerShell) in the `backend` folder.
-2. Type `npm install` and wait.
-3. Type `npm run dev`.
-4. Go to `http://localhost:1337/admin` and create your first Admin account.
-
-### Step C: Start the Frontend (The Face)
-
-1. Open a **new** terminal in the `frontend` folder.
-2. Type `npm install` and wait.
-3. Type `npm run dev`.
-4. Go to `http://localhost:3000`. You should see the website!
-
----
-
-## 3. Where is the "Important" Code?
-
-If someone asks you where specific things are, look here:
-
-| Feature | Folder Path | Why? |
+| Feature | Folder | Why it matters |
 | :--- | :--- | :--- |
-| **The Map** | `src/components/events/event-map.tsx` | This contains all the Leaflet.js map logic. |
-| **Authentication** | `src/app/api/auth/` | This handles login/signup via NextAuth. |
-| **Pages (URLs)** | `src/app/` | Every folder here is a different page on the site. |
-| **Database Fields** | `backend/src/api/event/content-types/` | Defines what info an event has (date, price, etc.). |
-| **Security Logic** | `backend/src/api/rsvp/controllers/` | Ensures users can't see each other's private data. |
+| Pages and routes | src/app/ | Contains the home page, event pages, dashboards, admin pages, and API routes |
+| Reusable UI | src/components/ | Contains the navbar, cards, buttons, map components, and shared UI |
+| Authentication and helpers | src/lib/ | Contains auth configuration, database access, and helper utilities |
+| Database schema | prisma/ | Contains the Prisma schema, migrations, and seed script |
 
----
+## 4. Main features to know
 
-## 4. How do I change things?
+- Home and events pages
+- Event detail page with map and RSVP actions
+- Authenticated dashboard for favorites and RSVPs
+- Admin moderation screens
+- Prisma-based persistence for events, users, categories, and reviews
 
-- **Want to add a new Event?** Use the Strapi Admin Panel (`/admin`).
-- **Want to change the colors?** Look at `src/app/globals.css`.
-- **Want to change the logo?** It's the `Calendar` icon from `lucide-react`, found in `navbar.tsx`.
+## 5. Big-picture concepts for viva
 
----
+1. Next.js powers the full app experience and API routes.
+2. Prisma provides the database layer and type-safe queries.
+3. NextAuth handles authentication and session management.
+4. Tailwind CSS and shadcn/ui provide the polished UI.
 
-## 5. The "Big Picture" Concepts (For the Viva)
+## 6. Common troubleshooting
 
-1. **Next.js**: We use this for the frontend because it's fast and SEO friendly.
-2. **Strapi**: We use this because it's a "Headless CMS"—it lets us manage data without writing complex SQL code.
-3. **Tailwind CSS**: This is how we made it look "Premium" without writing thousands of lines of CSS.
-4. **JWT (JSON Web Token)**: This is the "Secret Key" given to a user when they log in so the server knows who they are.
-
----
-
-## 6. Common Troubleshooting
-
-- **"Database Error"**: Make sure your `.env` file in the backend has a valid database URL.
-- **"Module Not Found"**: You probably forgot to run `npm install`.
-- **"Map not showing"**: Check your internet connection (it needs to download map tiles).
-
----
-
-> [!TIP]
-> If you are nervous, just remember: The **Frontend** asks for data, and the **Backend** gives it. Everything else is just styling!
+- If the app fails to start, run npm install again.
+- If database tables are missing, run npx prisma migrate dev.
+- If sample content is missing, run npx prisma db seed.
+- If the map is blank, check that the browser can load OpenStreetMap tiles.
