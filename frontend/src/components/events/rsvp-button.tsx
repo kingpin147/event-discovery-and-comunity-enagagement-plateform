@@ -5,9 +5,10 @@ import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { Check, Loader2 } from 'lucide-react'
+import { createRSVP } from '@/lib/api'
 
 interface RSVPButtonProps {
-  eventId: string
+  eventId: number
   isRSVPed?: boolean
 }
 
@@ -16,6 +17,7 @@ export default function RSVPButton({ eventId, isRSVPed: initialRSVPed = false }:
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [isRSVPed, setIsRSVPed] = useState(initialRSVPed)
+  const [error, setError] = useState<string | null>(null)
 
   const handleRSVP = async () => {
     if (!session) {
@@ -24,44 +26,45 @@ export default function RSVPButton({ eventId, isRSVPed: initialRSVPed = false }:
     }
 
     setLoading(true)
+    setError(null)
 
     try {
-      // In real app, this would be a POST to Strapi
-      // const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/rsvps`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${(session as any).jwt}`,
-      //   },
-      //   body: JSON.stringify({ data: { event: eventId, user: (session as any).id } }),
-      // })
-
-      // Mocking success
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await createRSVP(eventId)
       setIsRSVPed(true)
-    } catch (error) {
-      console.error('RSVP error:', error)
+    } catch (err: any) {
+      // If already RSVPed (409 conflict), treat as success
+      if (err.message?.includes('Already RSVPed')) {
+        setIsRSVPed(true)
+      } else {
+        setError(err.message || 'Failed to RSVP')
+        console.error('RSVP error:', err)
+      }
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Button 
-      className={`w-full h-14 text-lg font-bold shadow-lg transition-all ${isRSVPed ? 'bg-green-600 hover:bg-green-700' : 'shadow-primary/25'}`}
-      size="lg"
-      onClick={handleRSVP}
-      disabled={loading || isRSVPed}
-    >
-      {loading ? (
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-      ) : isRSVPed ? (
-        <>
-          <Check className="mr-2 h-5 w-5" /> RSVP Confirmed
-        </>
-      ) : (
-        'RSVP for this Event'
+    <div className="space-y-1">
+      <Button
+        className={`w-full h-14 text-lg font-bold shadow-lg transition-all ${isRSVPed ? 'bg-green-600 hover:bg-green-700' : 'shadow-primary/25'}`}
+        size="lg"
+        onClick={handleRSVP}
+        disabled={loading || isRSVPed}
+      >
+        {loading ? (
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        ) : isRSVPed ? (
+          <>
+            <Check className="mr-2 h-5 w-5" /> RSVP Confirmed
+          </>
+        ) : (
+          'RSVP for this Event'
+        )}
+      </Button>
+      {error && (
+        <p className="text-xs text-destructive text-center">{error}</p>
       )}
-    </Button>
+    </div>
   )
 }

@@ -45,20 +45,22 @@ const MapClient = ({ events, center = [51.505, -0.09], zoom = 13, hoveredEventId
       />
       <MapUpdater center={center} />
       {events.map((event) => {
-        if (!event.coordinates) return null
+        const lat = event.coordinatesLat ?? event.coordinates?.lat
+        const lng = event.coordinatesLng ?? event.coordinates?.lng
+        if (lat == null || lng == null) return null
         
-        const isHovered = hoveredEventId === event.documentId
+        const isHovered = hoveredEventId === String(event.id)
         
         return (
           <Marker 
-            key={event.documentId} 
-            position={[event.coordinates.lat, event.coordinates.lng]}
+            key={event.id} 
+            position={[lat, lng]}
             opacity={isHovered ? 1 : 0.7}
           >
             <Popup>
               <div className="p-1">
                 <h3 className="font-bold text-sm">{event.title}</h3>
-                <p className="text-xs text-muted-foreground">{event.venue_address}</p>
+                <p className="text-xs text-muted-foreground">{event.venueAddress || event.venue_address}</p>
                 <p className="text-xs mt-1 font-semibold text-primary">{event.time} | {event.date}</p>
               </div>
             </Popup>

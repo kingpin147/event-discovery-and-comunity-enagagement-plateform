@@ -25,13 +25,13 @@ const EventCard = ({ event, isHovered, onHover }: EventCardProps) => {
         "overflow-hidden transition-all duration-300 hover:shadow-xl group flex flex-col h-full",
         isHovered && "ring-2 ring-primary border-primary shadow-xl"
       )}
-      onMouseEnter={() => onHover?.(event.documentId)}
+      onMouseEnter={() => onHover?.(String(event.id))}
       onMouseLeave={() => onHover?.(null)}
     >
       <div className="relative aspect-video overflow-hidden">
-        {event.image ? (
+        {(event.imageUrl || event.image) ? (
           <Image
-            src={event.image.url}
+            src={event.imageUrl || event.image?.url || ''}
             alt={event.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -78,7 +78,7 @@ const EventCard = ({ event, isHovered, onHover }: EventCardProps) => {
             {event.title}
           </h3>
           <span className="font-bold text-primary whitespace-nowrap">
-            {event.ticket_price === 0 ? 'FREE' : `$${event.ticket_price}`}
+            {(event.ticketPrice ?? event.ticket_price ?? 0) === 0 ? 'FREE' : `$${event.ticketPrice ?? event.ticket_price}`}
           </span>
         </div>
 
@@ -93,7 +93,7 @@ const EventCard = ({ event, isHovered, onHover }: EventCardProps) => {
           </div>
           <div className="flex items-start gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <span className="line-clamp-1">{event.venue_address}</span>
+            <span className="line-clamp-1">{event.venueAddress || event.venue_address}</span>
           </div>
         </div>
       </CardContent>

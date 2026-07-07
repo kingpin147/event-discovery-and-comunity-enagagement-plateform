@@ -11,59 +11,15 @@ import {
 } from "@/components/ui/carousel";
 import EventCard from "@/components/events/event-card";
 
-// Mock Data for Featured Events
-const FEATURED_EVENTS = [
-  {
-    id: 1,
-    documentId: 'evt_1',
-    title: 'Summer Music Festival 2026',
-    slug: 'summer-music-festival-2026',
-    date: 'July 15, 2026',
-    time: '4:00 PM',
-    venue_address: 'Central Park, New York',
-    ticket_price: 45,
-    featured: true,
-    category: { name: 'Music', color: '#3b82f6' }
-  },
-  {
-    id: 2,
-    documentId: 'evt_2',
-    title: 'Tech Innovation Summit',
-    slug: 'tech-innovation-summit',
-    date: 'August 10, 2026',
-    time: '9:00 AM',
-    venue_address: 'Javits Center, New York',
-    ticket_price: 0,
-    featured: true,
-    category: { name: 'Tech', color: '#10b981' }
-  },
-  {
-    id: 3,
-    documentId: 'evt_3',
-    title: 'Food & Wine Expo',
-    slug: 'food-wine-expo',
-    date: 'September 5, 2026',
-    time: '12:00 PM',
-    venue_address: 'Hudson Yards, New York',
-    ticket_price: 25,
-    featured: true,
-    category: { name: 'Food', color: '#f59e0b' }
-  },
-  {
-    id: 4,
-    documentId: 'evt_4',
-    title: 'Art in the Park',
-    slug: 'art-in-the-park',
-    date: 'June 20, 2026',
-    time: '10:00 AM',
-    venue_address: 'Prospect Park, Brooklyn',
-    ticket_price: 0,
-    featured: true,
-    category: { name: 'Art', color: '#8b5cf6' }
-  }
-];
+import { prisma } from "@/lib/db";
 
-export default function Home() {
+export default async function Home() {
+  const featuredEvents = await prisma.event.findMany({
+    where: { featured: true, status: 'PUBLISHED' },
+    include: { category: true },
+    take: 6,
+    orderBy: { createdAt: 'desc' }
+  });
   return (
     <div className="flex flex-col gap-24 pb-24">
       {/* Hero Section */}
@@ -134,8 +90,8 @@ export default function Home() {
               className="w-full"
             >
               <CarouselContent className="-ml-4">
-                {FEATURED_EVENTS.map((event) => (
-                  <CarouselItem key={event.documentId} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                {featuredEvents.map((event) => (
+                  <CarouselItem key={event.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
                     <EventCard event={event as any} />
                   </CarouselItem>
                 ))}
