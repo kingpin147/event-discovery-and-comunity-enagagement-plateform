@@ -41,9 +41,9 @@ If someone asks you where specific things are, look here:
 
 | Feature | Folder Path | Why? |
 | :--- | :--- | :--- |
-| **The Map** | `frontend/src/components/events/event-map.tsx` | This contains all the Leaflet.js map logic. |
-| **Authentication** | `frontend/src/app/api/auth/` | This handles login/signup via NextAuth. |
-| **Pages (URLs)** | `frontend/src/app/` | Every folder here is a different page on the site. |
+| **The Map** | `src/components/events/event-map.tsx` | This contains all the Leaflet.js map logic. |
+| **Authentication** | `src/app/api/auth/` | This handles login/signup via NextAuth. |
+| **Pages (URLs)** | `src/app/` | Every folder here is a different page on the site. |
 | **Database Fields** | `backend/src/api/event/content-types/` | Defines what info an event has (date, price, etc.). |
 | **Security Logic** | `backend/src/api/rsvp/controllers/` | Ensures users can't see each other's private data. |
 
@@ -52,7 +52,7 @@ If someone asks you where specific things are, look here:
 ## 4. How do I change things?
 
 - **Want to add a new Event?** Use the Strapi Admin Panel (`/admin`).
-- **Want to change the colors?** Look at `frontend/src/app/globals.css`.
+- **Want to change the colors?** Look at `src/app/globals.css`.
 - **Want to change the logo?** It's the `Calendar` icon from `lucide-react`, found in `navbar.tsx`.
 
 ---

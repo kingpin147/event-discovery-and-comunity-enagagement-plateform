@@ -1,114 +1,36 @@
-# Event Discovery & Community Engagement Platform
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A premium, full-stack web application designed to help users find, explore, and participate in local and online events. Featuring an interactive map interface, real-time synchronization, and a complete RSVP system.
+## Getting Started
 
-## 🌟 Key Features
-
-* **Interactive Map (Leaflet.js)**: Browse events geographically with custom markers and synchronized list view.
-* **Dynamic Event Discovery**: Filter by multiple categories, search by keywords, and view featured events.
-* **Headless CMS (Strapi v5)**: Manage all content effortlessly with a powerful admin dashboard.
-* **Secure Authentication (NextAuth.js)**: Role-based access for Guests, Registered Users, and Admins.
-* **RSVP System**: Register for events with a single click and manage them in your personal dashboard.
-* **User-Led Submissions**: Registered users can submit their own events for admin review and approval.
-* **Premium Dashboard**: Manage your profile, view registration history, track favorite events, and create listings.
-* **Advanced Security**: Backend-level validation to ensure users only see and manage their own data.
-* **Informational Hub**: Comprehensive "About Us" and "Contact Us" pages for a complete platform experience.
-* **Blazing Performance**: Redis-powered caching (Upstash) and image optimization (Cloudinary).
-* **Fully Responsive**: Premium UI designed for mobile, tablet, and desktop using Tailwind CSS and Shadcn/ui.
-
-## 🛠️ Tech Stack
-
-### Frontend
-
-* **Framework**: Next.js 15+ (App Router)
-* **Styling**: Tailwind CSS & Shadcn/ui
-* **Authentication**: NextAuth.js
-* **Maps**: Leaflet.js
-* **Caching**: Upstash Redis
-
-### Backend
-
-* **CMS**: Strapi v5
-* **Database**: PostgreSQL (Neon.tech)
-* **Media Hosting**: Cloudinary
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-* Node.js 18+
-* npm / yarn / pnpm
-
-### 1. Backend Setup (Strapi)
+First, run the development server:
 
 ```bash
-cd backend
-npm install
-# Configure your .env file with Neon.tech and Cloudinary credentials
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### 2. Frontend Setup (Next.js)
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-cd frontend
-npm install
-# Configure your .env.local with Strapi URL and Upstash Redis credentials
-npm run dev
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
----
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## 🔑 Environment Variables
+## Learn More
 
-### Backend (.env)
+To learn more about Next.js, take a look at the following resources:
 
-```env
-DATABASE_URL=your_neon_postgres_url
-CLOUDINARY_NAME=your_name
-CLOUDINARY_KEY=your_key
-CLOUDINARY_SECRET=your_secret
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-### Frontend (.env.local)
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-```env
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
-UPSTASH_REDIS_REST_URL=your_redis_url
-UPSTASH_REDIS_REST_TOKEN=your_redis_token
-NEXTAUTH_SECRET=your_random_secret
-```
+## Deploy on Vercel
 
----
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## 📂 Project Structure
-
-```text
-├── backend/            # Strapi v5 Headless CMS
-│   ├── src/api/        # Event, Category, and RSVP models
-│   └── config/         # Database and Plugin configurations
-└── frontend/           # Next.js 15+ Frontend
-    ├── src/app/        # Pages and Routes
-    ├── src/components/ # UI and Logic components
-    └── src/lib/        # Utilities (Strapi fetch, Redis client)
-```
-
----
-
-## 📜 Documentation
-
-For more detailed information, please refer to:
-
-* [Implementation Plan](./implementation.md)
-* [Project Instructions](./projectInstruction.md)
-* [Viva Preparation Guide](./viva_guide.md)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is licensed under the MIT License.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

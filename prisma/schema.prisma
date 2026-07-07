@@ -1,0 +1,126 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Note: SQLite does not support native enums in Prisma.
+// UserRole values: "GUEST" | "USER" | "ADMIN"
+// EventStatus values: "DRAFT" | "PUBLISHED"
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String // Hashed with bcryptjs
+  role      String   @default("USER") // "GUEST" | "USER" | "ADMIN"
+  createdAt DateTime @default(now())
+
+  // Relations
+  events    Event[]    @relation("UserEvents")
+  rsvps     RSVP[]
+  favorites Favorite[]
+  reviews   Review[]
+
+  @@map("users")
+}
+
+model Event {
+  id             Int      @id @default(autoincrement())
+  title          String
+  slug           String   @unique
+  description    String?
+  date           String // Stored as ISO date string (YYYY-MM-DD)
+  time           String // Stored as time string (HH:MM)
+  venueAddress   String
+  coordinatesLat Float?
+  coordinatesLng Float?
+  ticketPrice    Float    @default(0)
+  featured       Boolean  @default(false)
+  imageUrl       String?
+  status         String   @default("DRAFT") // "DRAFT" | "PUBLISHED"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  categoryId  Int?
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  organizerId Int?
+  organizer   User?      @relation("UserEvents", fields: [organizerId], references: [id], onDelete: SetNull)
+  rsvps       RSVP[]
+  favorites   Favorite[]
+  reviews     Review[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([featured])
+  @@index([categoryId])
+  @@map("events")
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId Int
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([userId])
+  @@map("reviews")
+}
+
+model Category {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  slug  String  @unique
+  color String  @default("#000000")
+  icon  String?
+
+  // Relations
+  events Event[]
+
+  @@map("categories")
+}
+
+model RSVP {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId Int
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+  @@map("rsvps")
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId Int
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+  @@map("favorites")
+}

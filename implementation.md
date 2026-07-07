@@ -1,24 +1,25 @@
 # Event Discovery & Community Engagement Platform Implementation Plan
 
-This plan details the architecture and step-by-step implementation for the Event Discovery & Community Engagement Platform. Based on your request, this plan specifically targets **100% free-tier services** for deployment, database, caching, and storage so you will not incur any costs.
+This plan details the architecture and step-by-step implementation for the Event Discovery & Community Engagement Platform. The current repository now uses a unified Next.js application with Prisma and internal API routes, so the core experience is implemented directly in one app rather than through a separate Strapi backend.
 
-## Selected Free-Tier Technology Stack
+> Status summary: the main user-facing features are included in the unified app. The Strapi-specific CMS/admin workflow has been replaced by built-in admin pages, Prisma-backed APIs, and review/moderation features.
+
+## Current Unified Technology Stack
 
 ### Frontend
 
 * **Framework**: Next.js (App Router)
-* **Styling**: Tailwind CSS & Shadcn/ui (Free, open-source)
-* **Authentication**: NextAuth.js (Free, open-source)
-* **Maps**: Leaflet.js with OpenStreetMap tiles (Completely free, no API key required unlike Google Maps)
-* **Deployment**: Vercel (Hobby Tier - Free forever for non-commercial projects)
+* **Styling**: Tailwind CSS & Shadcn/ui
+* **Authentication**: NextAuth.js
+* **Maps**: Leaflet.js with OpenStreetMap tiles
+* **Deployment**: Vercel-ready Next.js app
 
-### Backend & CMS
+### Backend
 
-* **Headless CMS**: Strapi v5 (Open-source)
-* **Database**: **Neon.tech** (Free Serverless PostgreSQL).
-* **File Storage**: **Cloudinary** (Offers a very generous free tier for image hosting and transformation, perfect for Strapi).
-* **Caching**: **Upstash Redis** (Free Serverless Redis). This will cache public Strapi API responses on the Next.js side. Since Render's free tier goes to sleep after inactivity, Redis caching ensures that users still experience blazing fast load times by serving cached event data instantly.
-* **Deployment**: **Render** (Offers a Free Web Service tier).
+* **Database**: Prisma + SQLite locally (ready to scale to PostgreSQL)
+* **API Layer**: Internal Next.js route handlers
+* **File Handling**: Basic upload endpoint for event images
+* **Admin Features**: Built-in admin dashboard for moderation and role management
 
 ---
 
@@ -72,40 +73,22 @@ This plan details the architecture and step-by-step implementation for the Event
 2. Add SEO meta tags and structured data for events.
 3. Provide instructions for deploying the Next.js app to Vercel and the Strapi app to Render.
 
-## Task List: Event Discovery & Community Engagement Platform
+## Current Implementation Status
 
-### Task List - Phase 1: Backend Setup
+### Core platform features
 
-* [x] Initialize a new Strapi v5 project (backend folder).
-* [ ] Configure Strapi to connect to Neon.tech PostgreSQL database.
-* [x] Integrate Strapi Cloudinary provider plugin for free image storage.
-* [x] Set up Data Modeling (Event, Category, RSVP).
-* [ ] Set up Strapi Roles & Permissions.
-* [ ] Expose REST API.
+* [x] Interactive map and event markers
+* [x] Event list view with search and category filters
+* [x] Event detail pages with venue, map, and pricing
+* [x] Featured events section on the homepage
+* [x] Authentication and protected dashboard routes
+* [x] RSVP and favorites workflows
+* [x] Review and rating support
+* [x] Admin moderation and user role management
 
-### Task List - Phase 2: Frontend Foundation
+### Still optional / future enhancements
 
-* [x] Initialize Next.js 16+ project (frontend folder) with Tailwind CSS.
-* [x] Setup Shadcn/ui.
-* [x] Configure environment variables.
-* [x] Create caching utility (Upstash Redis).
-* [x] Create core layout.
-
-### Task List - Phase 3: Core Features
-
-* [x] Integrate interactive map (Leaflet.js).
-* [x] Build Event List View.
-* [x] Implement synchronization between map and list.
-* [x] Add Category Filtering & Search.
-
-### Task List - Phase 4: Event Details & Media
-
-* [x] Create dynamic Event Detail Page.
-* [x] Build Featured Events Section carousel.
-
-### Task List - Phase 5: Authentication & User Engagement
-
-* [x] Auth Integration (NextAuth.js + Strapi).
-* [x] Role Management.
-* [x] RSVP System.
-* [x] User Dashboard.
+* [ ] External Strapi CMS deployment
+* [ ] Cloudinary-based media storage
+* [ ] Full production-grade caching layer with Redis
+* [ ] Advanced moderation workflows and content approval history
