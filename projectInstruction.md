@@ -6,7 +6,7 @@ Event Discovery & Community Engagement Platform
 
 ## Current Architecture
 
-This repository is now a single Next.js application rooted at the workspace root. It uses internal API routes, Prisma for data access, and NextAuth for authentication rather than a separate Strapi backend.
+The repository contains the main Next.js application at the workspace root and an optional Strapi backend in the strapi-backend folder. The core product experience is delivered by the Next.js app, while the Strapi folder can be used for CMS-style content workflows.
 
 ## What the platform does
 
@@ -35,29 +35,33 @@ This repository is now a single Next.js application rooted at the workspace root
 
 ## Current implementation stack
 
-- Frontend: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui
+- Frontend: Next.js, React, TypeScript, Tailwind CSS, and shadcn/ui
 - Maps: Leaflet and react-leaflet
 - Authentication: NextAuth.js with credentials login
-- Database: Prisma with SQLite locally
+- Database: Prisma with PostgreSQL via DATABASE_URL
 - API: Next.js route handlers in src/app/api
+- Optional backend: Strapi under strapi-backend/
 
 ## Project structure
 
-- src/app/ — pages and route handlers
+- src/app/ — pages, layouts, and route handlers
 - src/components/ — UI and event-specific components
 - src/lib/ — auth, database, API helpers, and utilities
 - prisma/ — schema, migrations, and seed data
+- strapi-backend/ — optional Strapi CMS backend companion
 
 ## Development workflow
 
 1. Install dependencies with npm install
-2. Run Prisma migrations with npx prisma migrate dev
-3. Seed sample data with npx prisma db seed
-4. Start the app with npm run dev
-5. Verify the build with npm run build
+2. Configure the DATABASE_URL environment variable
+3. Run Prisma migrations with npx prisma migrate dev
+4. Seed sample data with npx prisma db seed
+5. Start the app with npm run dev
+6. Verify the build with npm run build
 
 ## Notes for contributors
 
 - Keep new features aligned with the existing App Router structure
-- Prefer Prisma for database changes rather than introducing a separate backend
+- Prefer Prisma for core event and user data changes
+- Use the Strapi backend only when a CMS-style workflow is required
 - Add or update documentation whenever the app behavior changes

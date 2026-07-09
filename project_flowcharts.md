@@ -1,6 +1,6 @@
 # Project Flowcharts
 
-This document summarizes the current workflows of the unified event platform.
+This document summarizes the current workflows of the event platform and its repository layout.
 
 ## 1. User journey flow
 
@@ -44,8 +44,12 @@ graph TD
     end
 
     subgraph Data
-        DB[(SQLite for local dev)]
+        DB[(PostgreSQL via DATABASE_URL)]
         Seed[Seed data]
+    end
+
+    subgraph OptionalBackend
+        Strapi[Strapi CMS in strapi-backend/]
     end
 
     UI <--> Routes
@@ -54,6 +58,7 @@ graph TD
     Routes <--> Prisma
     Prisma <--> DB
     Seed --> DB
+    Strapi -. optional content backend .-> Routes
 ```
 
 ## 4. Authentication flow

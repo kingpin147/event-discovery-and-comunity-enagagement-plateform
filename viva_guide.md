@@ -1,6 +1,6 @@
 # Viva Guide
 
-This guide covers the current unified event platform and the main concepts you should be ready to explain.
+This guide covers the current event platform and the main concepts you should be ready to explain.
 
 ## 1. Project overview
 
@@ -13,7 +13,7 @@ A: Guest users can browse public content, registered users can interact with eve
 ## 2. Frontend stack
 
 Q: Why was Next.js chosen?
-A: It provides a modern React-based app structure with server-rendered pages, route-based organization, and built-in API support.
+A: It provides a modern React-based app structure with route-based organization and built-in API support.
 
 Q: How is styling handled?
 A: Tailwind CSS and shadcn/ui are used for a modern, responsive interface.
@@ -21,7 +21,7 @@ A: Tailwind CSS and shadcn/ui are used for a modern, responsive interface.
 ## 3. Backend and data layer
 
 Q: What database solution is used?
-A: Prisma is used with SQLite for local development and can be switched to PostgreSQL for production.
+A: Prisma is used with PostgreSQL through DATABASE_URL for the core event and user data.
 
 Q: What is the role of NextAuth?
 A: NextAuth handles user sign-in, session management, and protected routes.
@@ -37,11 +37,11 @@ A: Admins can moderate events and manage user roles from dedicated admin interfa
 ## 5. Architecture questions
 
 Q: How is the project structured?
-A: The app is organized as a single Next.js application with pages under src/app, reusable UI in src/components, shared logic in src/lib, and database models in prisma/.
+A: The main application is organized under src/app, reusable UI is in src/components, shared logic is in src/lib, database models are in prisma/, and an optional Strapi backend exists in strapi-backend/.
 
 Q: How does the app handle event data?
 A: Event data is stored in the Prisma database and served through internal route handlers under src/app/api.
 
 ## 6. Final viva tip
 
-Focus on explaining the architecture, user flows, and why the chosen tools fit the project. Mention that the current version is a unified single-app solution rather than a separate frontend/backend split.
+Focus on explaining the architecture, user flows, and why the chosen tools fit the project. Mention that the main product is a Next.js application with an optional Strapi backend for CMS-style features.

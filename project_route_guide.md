@@ -1,6 +1,6 @@
 # Project Page and Route Guide
 
-This guide maps the current unified Next.js application and its main routes.
+This guide maps the main Next.js application and the optional Strapi backend companion in the repository.
 
 ## Public pages
 
@@ -46,8 +46,13 @@ All dashboard pages require an authenticated session.
 | /api/categories | src/app/api/categories/route.ts | List and create categories |
 | /api/rsvps | src/app/api/rsvps/route.ts | Create or list RSVPs |
 | /api/favorites | src/app/api/favorites/route.ts | Create or list favorites |
+| /api/upload | src/app/api/upload/route.ts | Upload event images |
 | /api/auth/register | src/app/api/auth/register/route.ts | User registration |
 | /api/auth/[...nextauth] | src/app/api/auth/[...nextauth]/route.ts | Sign-in and session handling |
+
+## Optional Strapi backend
+
+The Strapi project lives in strapi-backend/ and can be used for CMS-style content management or future extension work. It is separate from the main Next.js application and does not replace the Prisma-backed event data layer.
 
 ## Interaction summary
 
