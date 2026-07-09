@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -49,8 +50,9 @@ export default function CreateEventPage() {
       if (json.data?.url) {
         setForm((prev) => ({ ...prev, imageUrl: json.data.url }))
       }
-    } catch (err: any) {
-      setError(err.message || 'Image upload failed')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Image upload failed'
+      setError(message)
     } finally {
       setUploadingFile(false)
     }
@@ -84,8 +86,9 @@ export default function CreateEventPage() {
 
       setSuccess(true)
       setTimeout(() => router.push('/dashboard'), 1200)
-    } catch (err: any) {
-      setError(err.message || 'Unable to submit event')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unable to submit event'
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -180,6 +183,8 @@ export default function CreateEventPage() {
                 onChange={handleFileChange}
                 accept="image/*"
                 className="hidden"
+                title="Upload event cover image"
+                aria-label="Upload event cover image"
               />
               <div 
                 onClick={() => fileInputRef.current?.click()}
@@ -187,7 +192,7 @@ export default function CreateEventPage() {
               >
                 {form.imageUrl ? (
                   <>
-                    <img src={form.imageUrl} alt="Preview" className="object-cover w-full h-full absolute inset-0" />
+                    <Image src={form.imageUrl} alt="Preview" fill className="object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <p className="text-white text-xs font-semibold">Change Image</p>
                     </div>
@@ -231,6 +236,8 @@ export default function CreateEventPage() {
                 <select
                   className="w-full rounded-xl h-12 border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   value={form.categoryId}
+                  title="Select event category"
+                  aria-label="Select event category"
                   onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
                   required
                 >
