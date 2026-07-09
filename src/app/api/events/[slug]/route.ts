@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { fetchStrapi } from '@/lib/strapi';
 
 export async function GET(
   req: NextRequest,
@@ -11,23 +11,25 @@ export async function GET(
     const { slug } = await params;
     const session = await getServerSession(authOptions);
 
-    const event = await prisma.event.findUnique({
-      where: { slug },
-      include: {
-        category: true,
-        _count: { select: { rsvps: true } },
-      },
-    });
-
-    if (!event) {
+    const checkRes = await fetchStrapi(`events?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=category&populate=organizer`);
+    if (!checkRes.data || checkRes.data.length === 0) {
       return NextResponse.json(
         { error: { status: 404, message: 'Event not found' } },
         { status: 404 }
       );
     }
 
-    // Check if current user has RSVPed
+    const event = checkRes.data[0];
+
+    let rsvpCount = 0;
     let userHasRSVPed = false;
+    
+    const { prisma } = await import('@/lib/db');
+
+    rsvpCount = await prisma.rSVP.count({
+      where: { eventId: event.id }
+    });
+
     if (session?.user) {
       const userId = parseInt((session.user as any).id);
       const rsvp = await prisma.rSVP.findUnique({
@@ -44,7 +46,7 @@ export async function GET(
     return NextResponse.json({
       data: {
         ...event,
-        rsvpCount: event._count.rsvps,
+        rsvpCount,
         userHasRSVPed,
       },
     });
@@ -75,19 +77,15 @@ export async function PUT(
     const userId = parseInt((session.user as any).id);
     const role = (session.user as any).role;
 
-    // Find the event
-    const event = await prisma.event.findUnique({
-      where: { slug },
-    });
-
-    if (!event) {
+    const checkRes = await fetchStrapi(`events?filters[slug][$eq]=${encodeURIComponent(slug)}`);
+    if (!checkRes.data || checkRes.data.length === 0) {
       return NextResponse.json(
         { error: { status: 404, message: 'Event not found' } },
         { status: 404 }
       );
     }
+    const event = checkRes.data[0];
 
-    // Check ownership or admin
     if (event.organizerId !== userId && role !== 'ADMIN') {
       return NextResponse.json(
         { error: { status: 403, message: 'Not authorized to update this event' } },
@@ -111,29 +109,35 @@ export async function PUT(
       status,
     } = body;
 
-    const updatedEvent = await prisma.event.update({
-      where: { slug },
-      data: {
-        ...(title && { title }),
-        ...(description !== undefined && { description }),
-        ...(date && { date }),
-        ...(time && { time }),
-        ...(venueAddress && { venueAddress }),
-        ...(coordinatesLat !== undefined && { coordinatesLat: parseFloat(coordinatesLat) }),
-        ...(coordinatesLng !== undefined && { coordinatesLng: parseFloat(coordinatesLng) }),
-        ...(ticketPrice !== undefined && { ticketPrice: parseFloat(ticketPrice) }),
-        ...(featured !== undefined && { featured }),
-        ...(imageUrl !== undefined && { imageUrl }),
-        ...(categoryId !== undefined && { categoryId: categoryId ? parseInt(categoryId) : null }),
-        ...(status && role === 'ADMIN' && { status }),
-      },
+    const strapiRes = await fetchStrapi(`events/${event.documentId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        data: {
+          ...(title && { title }),
+          ...(description !== undefined && { description }),
+          ...(date && { date }),
+          ...(time && { time }),
+          ...(venueAddress && { venueAddress }),
+          ...(coordinatesLat !== undefined && { coordinatesLat: parseFloat(coordinatesLat) }),
+          ...(coordinatesLng !== undefined && { coordinatesLng: parseFloat(coordinatesLng) }),
+          ...(ticketPrice !== undefined && { ticketPrice: parseFloat(ticketPrice) }),
+          ...(featured !== undefined && { featured }),
+          ...(imageUrl !== undefined && { imageUrl }),
+          ...(categoryId !== undefined && { category: categoryId ? parseInt(categoryId) : null }),
+          ...(status && role === 'ADMIN' && { status }),
+        }
+      })
     });
 
-    return NextResponse.json({ data: updatedEvent });
-  } catch (error) {
+    if (!strapiRes.data) {
+      throw new Error(strapiRes.error?.message || 'Failed to update event in Strapi');
+    }
+
+    return NextResponse.json({ data: strapiRes.data });
+  } catch (error: any) {
     console.error('PUT event error:', error);
     return NextResponse.json(
-      { error: { status: 500, message: 'Internal server error' } },
+      { error: { status: 500, message: error.message || 'Internal server error' } },
       { status: 500 }
     );
   }
@@ -157,19 +161,15 @@ export async function DELETE(
     const userId = parseInt((session.user as any).id);
     const role = (session.user as any).role;
 
-    // Find the event
-    const event = await prisma.event.findUnique({
-      where: { slug },
-    });
-
-    if (!event) {
+    const checkRes = await fetchStrapi(`events?filters[slug][$eq]=${encodeURIComponent(slug)}`);
+    if (!checkRes.data || checkRes.data.length === 0) {
       return NextResponse.json(
         { error: { status: 404, message: 'Event not found' } },
         { status: 404 }
       );
     }
+    const event = checkRes.data[0];
 
-    // Check ownership or admin
     if (event.organizerId !== userId && role !== 'ADMIN') {
       return NextResponse.json(
         { error: { status: 403, message: 'Not authorized to delete this event' } },
@@ -177,8 +177,8 @@ export async function DELETE(
       );
     }
 
-    await prisma.event.delete({
-      where: { slug },
+    await fetchStrapi(`events/${event.documentId}`, {
+      method: 'DELETE',
     });
 
     return NextResponse.json({ data: { message: 'Event deleted' } });

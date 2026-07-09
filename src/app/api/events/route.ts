@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
-import { slugify } from '@/lib/utils';
+import { fetchStrapi } from '@/lib/strapi';
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,44 +12,69 @@ export async function GET(req: NextRequest) {
     const limit = Math.max(1, parseInt(searchParams.get('limit') || '12'));
     const featured = searchParams.get('featured');
 
-    // Build where clause
-    const where: any = { status: 'PUBLISHED' };
+    const qs = new URLSearchParams();
+    qs.set('populate', 'category');
+    qs.set('pagination[page]', String(page));
+    qs.set('pagination[pageSize]', String(limit));
+    qs.set('sort[0]', 'createdAt:desc');
+
+    // Only fetch PUBLISHED events by default for public discovery
+    qs.set('filters[status][$eq]', 'PUBLISHED');
 
     if (search) {
-      where.OR = [
-        { title: { contains: search } },
-        { venueAddress: { contains: search } },
-      ];
+      qs.set('filters[$or][0][title][$contains]', search);
+      qs.set('filters[$or][1][venueAddress][$contains]', search);
     }
 
     if (category) {
-      where.category = { slug: category };
+      qs.set('filters[category][slug][$eq]', category);
     }
 
     if (featured === 'true') {
-      where.featured = true;
+      qs.set('filters[featured][$eq]', 'true');
     }
 
-    // Count total
-    const total = await prisma.event.count({ where });
+    const strapiRes = await fetchStrapi(`events?${qs.toString()}`);
 
-    // Fetch paginated events
-    const events = await prisma.event.findMany({
-      where,
-      include: {
-        category: true,
-        _count: { select: { rsvps: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
+    // Map Strapi events to the client format (ensure fields are populated)
+    const data = (strapiRes.data || []).map((item: any) => {
+      return {
+        id: item.id,
+        documentId: item.documentId,
+        title: item.title,
+        slug: item.slug,
+        description: item.description,
+        date: item.date,
+        time: item.time,
+        venueAddress: item.venueAddress,
+        coordinatesLat: item.coordinatesLat,
+        coordinatesLng: item.coordinatesLng,
+        ticketPrice: item.ticketPrice,
+        featured: item.featured,
+        imageUrl: item.imageUrl,
+        status: item.status,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        category: item.category || null,
+        organizer: item.organizer || null,
+        rsvpCount: 0, 
+      };
     });
 
-    // Map to include rsvpCount
-    const data = events.map((event) => ({
-      ...event,
-      rsvpCount: event._count.rsvps,
-    }));
+    // Hydrate the rsvpCount from local database
+    const eventIds = data.map((e: any) => e.id);
+    if (eventIds.length > 0) {
+      const { prisma } = await import('@/lib/db');
+      const rsvps = await prisma.rSVP.groupBy({
+        by: ['eventId'],
+        where: { eventId: { in: eventIds } },
+        _count: { id: true },
+      });
+      const rsvpMap = new Map(rsvps.map((r: any) => [r.eventId, r._count.id]));
+      data.forEach((e: any) => {
+        e.rsvpCount = rsvpMap.get(e.id) || 0;
+      });
+    }
 
     return NextResponse.json({
       data,
@@ -58,8 +82,8 @@ export async function GET(req: NextRequest) {
         pagination: {
           page,
           pageSize: limit,
-          total,
-          pageCount: Math.ceil(total / limit),
+          total: strapiRes.meta?.pagination?.total || 0,
+          pageCount: strapiRes.meta?.pagination?.pageCount || 1,
         },
       },
     });
@@ -108,39 +132,66 @@ export async function POST(req: NextRequest) {
     }
 
     // Auto-generate slug from title, ensure uniqueness
+    const { slugify } = await import('@/lib/utils');
     let baseSlug = slugify(title);
     let slug = baseSlug;
     let counter = 2;
 
-    while (await prisma.event.findUnique({ where: { slug } })) {
+    // Check slug uniqueness in Strapi
+    while (true) {
+      const checkRes = await fetchStrapi(`events?filters[slug][$eq]=${slug}`);
+      if (!checkRes.data || checkRes.data.length === 0) break;
       slug = `${baseSlug}-${counter}`;
       counter++;
     }
 
-    const event = await prisma.event.create({
-      data: {
-        title,
-        slug,
-        description,
-        date,
-        time,
-        venueAddress,
-        coordinatesLat: coordinatesLat ? parseFloat(coordinatesLat) : undefined,
-        coordinatesLng: coordinatesLng ? parseFloat(coordinatesLng) : undefined,
-        ticketPrice: ticketPrice ? parseFloat(ticketPrice) : 0,
-        featured: featured || false,
-        imageUrl,
-        categoryId: categoryId ? parseInt(categoryId) : undefined,
-        organizerId: parseInt((session.user as any).id),
-        status: 'DRAFT',
-      },
+    // Post to Strapi
+    const organizerId = parseInt((session.user as any).id);
+    const strapiRes = await fetchStrapi('events', {
+      method: 'POST',
+      body: JSON.stringify({
+        data: {
+          title,
+          slug,
+          description,
+          date,
+          time,
+          venueAddress,
+          coordinatesLat: coordinatesLat ? parseFloat(coordinatesLat) : undefined,
+          coordinatesLng: coordinatesLng ? parseFloat(coordinatesLng) : undefined,
+          ticketPrice: ticketPrice ? parseFloat(ticketPrice) : 0,
+          featured: featured || false,
+          imageUrl,
+          category: categoryId ? parseInt(categoryId) : null,
+          organizerId,
+          status: 'DRAFT',
+        }
+      })
     });
 
-    return NextResponse.json({ data: event });
-  } catch (error) {
+    if (!strapiRes.data) {
+      throw new Error(strapiRes.error?.message || 'Failed to create event in Strapi');
+    }
+
+    const createdEvent = {
+      id: strapiRes.data.id,
+      documentId: strapiRes.data.documentId,
+      title: strapiRes.data.title,
+      slug: strapiRes.data.slug,
+      description: strapiRes.data.description,
+      date: strapiRes.data.date,
+      time: strapiRes.data.time,
+      venueAddress: strapiRes.data.venueAddress,
+      ticketPrice: strapiRes.data.ticketPrice,
+      imageUrl: strapiRes.data.imageUrl,
+      status: strapiRes.data.status,
+    };
+
+    return NextResponse.json({ data: createdEvent });
+  } catch (error: any) {
     console.error('POST event error:', error);
     return NextResponse.json(
-      { error: { status: 500, message: 'Internal server error' } },
+      { error: { status: 500, message: error.message || 'Internal server error' } },
       { status: 500 }
     );
   }

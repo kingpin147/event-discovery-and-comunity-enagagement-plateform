@@ -1,14 +1,15 @@
 'use client'
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
-import { Event, Category } from '@/types'
+import { Event, Category, Favorite } from '@/types'
 import EventCard from '@/components/events/event-card'
 import EventMap from '@/components/events/event-map'
 import { Input } from '@/components/ui/input'
 import { Search, SlidersHorizontal, Map as MapIcon, List as ListIcon, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getEvents, getCategories } from '@/lib/api'
+import { getEvents, getCategories, getMyFavorites } from '@/lib/api'
+import { useSession } from 'next-auth/react'
 
 export default function EventsPage() {
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null)
@@ -18,11 +19,33 @@ export default function EventsPage() {
   const [page, setPage] = useState(1)
 
   // Data state
+  const { data: session } = useSession()
   const [events, setEvents] = useState<Event[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [favorites, setFavorites] = useState<Favorite[]>([])
   const [loading, setLoading] = useState(true)
   const [totalPages, setTotalPages] = useState(1)
   const [loadingMore, setLoadingMore] = useState(false)
+
+  // Fetch favorites on mount or session change
+  useEffect(() => {
+    if (session?.user) {
+      getMyFavorites()
+        .then((res) => setFavorites(res.data))
+        .catch((err) => console.error('Failed to load favorites:', err))
+    } else {
+      setFavorites([])
+    }
+  }, [session])
+
+  const handleFavoriteToggleInList = (eventId: number, favoriteId: number | null) => {
+    if (favoriteId === null) {
+      setFavorites(prev => prev.filter(f => f.eventId !== eventId))
+    } else {
+      const newFav: Favorite = { id: favoriteId, eventId, userId: parseInt(session?.user?.id || '0'), createdAt: new Date().toISOString() }
+      setFavorites(prev => [...prev, newFav])
+    }
+  }
 
   // Fetch categories once on mount
   useEffect(() => {
@@ -157,14 +180,19 @@ export default function EventsPage() {
           ) : filteredEvents.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    isHovered={hoveredEventId === String(event.id)}
-                    onHover={setHoveredEventId}
-                  />
-                ))}
+                {filteredEvents.map((event) => {
+                  const fav = favorites.find((f) => f.eventId === event.id)
+                  return (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      isHovered={hoveredEventId === String(event.id)}
+                      onHover={setHoveredEventId}
+                      initialFavoriteId={fav ? fav.id : null}
+                      onFavoriteToggle={handleFavoriteToggleInList}
+                    />
+                  )
+                })}
               </div>
               {page < totalPages && (
                 <div className="flex justify-center py-4">

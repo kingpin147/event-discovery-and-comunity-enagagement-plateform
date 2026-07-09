@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,12 +26,16 @@ export async function POST(req: NextRequest) {
 
     const bytes = await (file as File).arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const fileName = `${Date.now()}-${(file as File).name.replace(/\s+/g, '-')}`;
-    const uploadDir = '/tmp/eventify-uploads';
+    
+    // Convert to base64 Data URI for direct Cloudinary upload
+    const base64Data = buffer.toString('base64');
+    const dataURI = `data:${(file as File).type};base64,${base64Data}`;
 
-    await import('fs/promises').then(({ mkdir, writeFile }) => mkdir(uploadDir, { recursive: true }).then(() => writeFile(`${uploadDir}/${fileName}`, buffer)));
+    const uploadResponse = await cloudinary.uploader.upload(dataURI, {
+      folder: 'eventify',
+    });
 
-    return NextResponse.json({ data: { url: `/api/upload/${fileName}` } });
+    return NextResponse.json({ data: { url: uploadResponse.secure_url } });
   } catch (error) {
     console.error('upload error:', error);
     return NextResponse.json({ error: { status: 500, message: 'Upload failed' } }, { status: 500 });

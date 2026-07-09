@@ -12,6 +12,7 @@ import EventMap from '@/components/events/event-map'
 import RSVPButton from '@/components/events/rsvp-button'
 import { Event, Review } from '@/types'
 import { getEvent } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,6 +35,7 @@ export default function EventDetailPage() {
   const [reviewError, setReviewError] = useState<string | null>(null)
   const [reviewSuccess, setReviewSuccess] = useState(false)
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })
+  const [favoriteId, setFavoriteId] = useState<number | null>(null)
 
   useEffect(() => {
     if (!slug) return
@@ -47,11 +49,22 @@ export default function EventDetailPage() {
         if (!isActive) return
 
         setEvent(eventRes.data)
+        
+        // Fetch reviews
         const reviewRes = await fetch(`/api/reviews?eventId=${eventRes.data.id}`)
         const reviewJson = await reviewRes.json()
         if (!isActive) return
-
         setReviews(reviewJson.data || [])
+
+        // Fetch favorite status if logged in
+        if (session?.user) {
+          const favRes = await fetch('/api/favorites/my')
+          const favJson = await favRes.json()
+          if (isActive && favJson.data) {
+            const fav = favJson.data.find((f: any) => f.eventId === eventRes.data.id)
+            setFavoriteId(fav ? fav.id : null)
+          }
+        }
       } catch (err) {
         if (!isActive) return
         setError(err instanceof Error ? err.message : 'Failed to load event')
@@ -63,7 +76,33 @@ export default function EventDetailPage() {
     return () => {
       isActive = false
     }
-  }, [slug])
+  }, [slug, session])
+
+  const handleFavoriteClick = async () => {
+    if (!session?.user || !event) {
+      window.location.href = '/auth/signin'
+      return
+    }
+
+    try {
+      if (favoriteId !== null) {
+        await fetch(`/api/favorites/${favoriteId}`, { method: 'DELETE' })
+        setFavoriteId(null)
+      } else {
+        const res = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventId: event.id }),
+        })
+        const json = await res.json()
+        if (res.ok && json.data) {
+          setFavoriteId(json.data.id)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to toggle favorite:', err)
+    }
+  }
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -267,7 +306,14 @@ export default function EventDetailPage() {
                 <div className="space-y-3">
                   <RSVPButton eventId={event.id} isRSVPed={event.userHasRSVPed} />
                   <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="h-12"><Heart className="mr-2 h-4 w-4" /> Save</Button>
+                    <Button
+                      variant={favoriteId !== null ? "default" : "outline"}
+                      onClick={handleFavoriteClick}
+                      className="h-12"
+                    >
+                      <Heart className={cn("mr-2 h-4 w-4", favoriteId !== null && "fill-current text-white")} />
+                      {favoriteId !== null ? "Saved" : "Save"}
+                    </Button>
                     <Button variant="outline" className="h-12"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
                   </div>
                 </div>

@@ -9,15 +9,52 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Event } from '@/types'
 import { cn } from '@/lib/utils'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { createFavorite, deleteFavorite } from '@/lib/api'
 
 interface EventCardProps {
   event: Event
   isHovered?: boolean
   onHover?: (id: string | null) => void
+  initialFavoriteId?: number | null
+  onFavoriteToggle?: (eventId: number, favoriteId: number | null) => void
 }
 
-const EventCard = ({ event, isHovered, onHover }: EventCardProps) => {
-  const [isFavorite, setIsFavorite] = React.useState(false)
+const EventCard = ({ event, isHovered, onHover, initialFavoriteId = null, onFavoriteToggle }: EventCardProps) => {
+  const { data: session } = useSession()
+  const router = useRouter()
+  const [favoriteId, setFavoriteId] = React.useState<number | null>(initialFavoriteId)
+
+  React.useEffect(() => {
+    setFavoriteId(initialFavoriteId)
+  }, [initialFavoriteId])
+
+  const isFavorite = favoriteId !== null
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!session?.user) {
+      router.push('/auth/signin')
+      return
+    }
+
+    try {
+      if (isFavorite && favoriteId !== null) {
+        await deleteFavorite(favoriteId)
+        setFavoriteId(null)
+        onFavoriteToggle?.(event.id, null)
+      } else {
+        const res = await createFavorite(event.id)
+        setFavoriteId(res.data.id)
+        onFavoriteToggle?.(event.id, res.data.id)
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err)
+    }
+  }
 
   return (
     <Card 
@@ -58,11 +95,7 @@ const EventCard = ({ event, isHovered, onHover }: EventCardProps) => {
         <Button 
           variant="ghost" 
           size="icon"
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setIsFavorite(!isFavorite)
-          }}
+          onClick={handleFavoriteClick}
           className={cn(
             "absolute bottom-2 right-2 rounded-full backdrop-blur-md transition-all z-10",
             isFavorite ? "bg-red-500 text-white hover:bg-red-600 shadow-lg" : "bg-background/50 hover:bg-background text-muted-foreground"

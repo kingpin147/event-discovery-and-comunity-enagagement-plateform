@@ -22,10 +22,18 @@ export async function fetchStrapi(endpoint: string, options: RequestInit = {}) {
   }
 
   // Fetch from Strapi
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  if (process.env.STRAPI_API_TOKEN) {
+    headers['Authorization'] = `Bearer ${process.env.STRAPI_API_TOKEN}`
+  }
+
   const response = await fetch(url, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...headers,
       ...options.headers,
     },
   })
